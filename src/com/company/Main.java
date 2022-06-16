@@ -17,6 +17,7 @@ public class Main {
         System.out.println(sl.add(456));
         System.out.println(sl.add(789));
         System.out.println(sl.add(101112));
+
         System.out.println("Получаем: " + sl.getAll() + "\n");
 
         System.out.println("Добавляем методом элементы со сдвигом вправо:");

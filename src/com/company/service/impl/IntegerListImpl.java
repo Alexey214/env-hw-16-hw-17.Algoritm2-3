@@ -21,10 +21,7 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public Integer add(Integer item) {
         ifNull(item);
-        if (arr.length == size()) {
-            Integer[] newArr = Arrays.copyOf(arr, size() + 3);
-            arr = newArr;
-        }
+        grow();
         for (int i = 0; i < arr.length; i++) {
             if (arr[i] != null) {
                 continue;
@@ -47,9 +44,8 @@ public class IntegerListImpl implements IntegerList {
             return item;
         } else {
             Integer buffer;
-            Integer[] newArr = Arrays.copyOf(arr, arr.length + 1);
-            arr = newArr;
-            for (int i = index; i < newArr.length; i++) {
+            grow();
+            for (int i = index; i < arr.length; i++) {
                 buffer = arr[i];
                 arr[i] = item;
                 item = buffer;
@@ -260,12 +256,20 @@ public class IntegerListImpl implements IntegerList {
 
     @Override
     public Integer[] sort(int[] arr) {
-        int[] intArray = sortInsertion(toArray());  //sortBubble - 14680мс, sortSelection - 3709мс, sortInsertion - 872мс
+        int[] intArray = sortInsertionWithRecursion(toArray(), arr.length);  //sortBubble - 14680мс, sortSelection - 3709мс, sortInsertion - 872мс
         Integer[] integerArray = IntStream.of(intArray).boxed().toArray(Integer[]::new);
         return integerArray;
     }
 
     //Служебные методы:
+
+    private Integer[] grow() {
+        if (arr.length == size()) {
+            int size = (int) Math.round(size() * 1.5);
+            arr = Arrays.copyOf(arr, size);
+        }
+        return arr;
+    }
 
     private Integer ifNull(Integer item) {
         if (item != null) {
@@ -286,7 +290,7 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public int[] testSort() {
         int[] bigArr = generateRandomArray();
-        return sortInsertion(bigArr);
+        return sortInsertionWithRecursion(bigArr, bigArr.length);
     }
 
     @Override
@@ -309,7 +313,7 @@ public class IntegerListImpl implements IntegerList {
 
     private int[] generateRandomArray() {
         Random random = new Random();
-        int[] arr = new int[100_000];
+        int[] arr = new int[10_000];
         for (int i = 0; i < arr.length; i++) {
             arr[i] = random.nextInt(100_000) + 1;
         }
@@ -356,6 +360,20 @@ public class IntegerListImpl implements IntegerList {
             }
             arr[j] = temp;
         }
+        return arr;
+    }
+
+    private int[] sortInsertionWithRecursion(int[] arr, int length) {
+        if (length <= 1)
+            return arr;
+        sortInsertionWithRecursion(arr, length - 1);
+        int last = arr[length - 1];
+        int j = length - 2;
+        while (j >= 0 && arr[j] > last) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = last;
         return arr;
     }
 
